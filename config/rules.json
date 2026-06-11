@@ -1,0 +1,53 @@
+{
+  "delay_thresholds": {
+    "Severe": 24,
+    "Moderate": 8,
+    "Minor": 0
+  },
+  "criticality_weights": {
+    "urgency": {
+      "Critical": 50,
+      "High": 30,
+      "Medium": 15,
+      "Low": 5
+    },
+    "dependency": {
+      "Healthcare": 40,
+      "Power Grid": 40,
+      "Public Utilities": 40,
+      "Transportation": 20,
+      "Food Supply": 20,
+      "Retail/Food Supply": 20,
+      "Manufacturing": 5,
+      "Retail": 5
+    },
+    "default_dependency": 5
+  },
+  "criticality_thresholds": {
+    "High": 70,
+    "Medium": 35,
+    "Low": 0
+  },
+  "risk_calculation": {
+    "delay_multiplier": 1.5,
+    "max_score": 100
+  },
+  "action_recommendations": [
+    {
+      "min_risk_score": 80,
+      "action": "IMMEDIATE ESCALATION: Re-route via priority track and dispatch emergency substitute."
+    },
+    {
+      "min_risk_score": 50,
+      "action": "ALERT: Expedite transit and notify downstream stakeholders to prepare contingencies."
+    },
+    {
+      "min_risk_score": 30,
+      "action": "MONITOR: Update ETA and notify receiving facility."
+    },
+    {
+      "min_risk_score": 0,
+      "action": "LOG: Standard delay logging. No immediate action required."
+    }
+  ]
+}
