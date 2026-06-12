@@ -1,46 +1,33 @@
 import json
 import os
-from agents import (
-    DelayDetectionAgent,
-    CargoCriticalityAgent,
-    ImpactPredictionAgent,
-    ActionRecommendationAgent
-)
+
+from pipeline import RailRiskPipeline
+
+
+def load_dataset() -> list[dict]:
+    path = os.path.join(os.path.dirname(__file__), '..', 'data', 'freight_dataset.json')
+    with open(path, 'r') as f:
+        return json.load(f)
+
 
 def main():
-    # Load the dataset
-    data_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'freight_dataset.json')
-    with open(data_path, 'r') as f:
-        dataset = json.load(f)
-        
-    # Initialize agents
-    delay_agent = DelayDetectionAgent()
-    criticality_agent = CargoCriticalityAgent()
-    impact_agent = ImpactPredictionAgent()
-    action_agent = ActionRecommendationAgent()
-    
-    print("--- RailRisk AI: Disruption Risk Intelligence System ---\n")
-    
-    # Process each shipment
-    for shipment in dataset:
-        print(f"Processing Shipment: {shipment['id']} | Cargo: {shipment['cargo_type']} | Destination: {shipment['destination']}")
-        
-        # 1. Delay Detection
-        delay_info = delay_agent.process(shipment)
-        print(f"  [1] Delay Detection   : {delay_info['delay_time_hours']} hours ({delay_info['delay_severity']} severity)")
-        
-        # 2. Cargo Criticality
-        crit_info = criticality_agent.process(shipment)
-        print(f"  [2] Cargo Criticality : {crit_info['criticality_level']} (Score: {crit_info['criticality_score']})")
-        
-        # 3. Impact Prediction
-        risk_info = impact_agent.process(shipment, delay_info, crit_info)
-        print(f"  [3] Risk & Impact     : Risk Score {risk_info['risk_score']} | Impact: {risk_info['predicted_impact']}")
-        
-        # 4. Action Recommendation
-        action_info = action_agent.process(shipment, risk_info)
-        print(f"  [4] Action Recomm.    : {action_info['recommended_action']}")
-        print("-" * 80)
+    dataset = load_dataset()
+    pipeline = RailRiskPipeline()
+
+    # Pick 4 diverse cases: oxygen, coal, electronics, industrial chemicals
+    test_ids = {"FRT-1001", "FRT-1005", "FRT-1007", "FRT-1008"}
+    test_cases = [s for s in dataset if s["id"] in test_ids]
+
+    print("====================================================")
+    print("  RailRisk AI - Pipeline Test Suite")
+    print("====================================================\n")
+
+    reports = pipeline.run_batch(test_cases)
+    for report in reports:
+        print(report.format_report())
+
+    print("All pipeline tests completed successfully.")
+
 
 if __name__ == "__main__":
     main()
