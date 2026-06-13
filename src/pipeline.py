@@ -20,7 +20,10 @@ class RailRiskReport:
         self.criticality_score = criticality_info.get("criticality_score", 0)
         self.risk_score = risk_info.get("risk_score", 0)
         self.predicted_impact = risk_info.get("predicted_impact", "Unknown")
+        self.risk_reasoning = risk_info.get("risk_reasoning", "")
+        self.human_status = risk_info.get("human_status", "Pending")
         self.recommended_action = action_info.get("recommended_action", "No action")
+        self.recommendation_reason = action_info.get("recommendation_reason", "")
 
     def format_report(self) -> str:
         sep = "-" * 60
@@ -35,8 +38,11 @@ class RailRiskReport:
             f"  Criticality : {self.criticality_level} (Score: {self.criticality_score})\n"
             f"  Risk Score  : {self.risk_score} / 100\n"
             f"  Impact      : {self.predicted_impact}\n"
+            f"  Reasoning   : {self.risk_reasoning}\n"
+            f"  Human Status: {self.human_status}\n"
             f"{sep}\n"
             f"  Action      : {self.recommended_action}\n"
+            f"  Action Reason: {self.recommendation_reason}\n"
             f"{sep}\n"
         )
 
@@ -51,7 +57,10 @@ class RailRiskReport:
             "criticality_score": self.criticality_score,
             "risk_score": self.risk_score,
             "predicted_impact": self.predicted_impact,
+            "risk_reasoning": self.risk_reasoning,
+            "human_status": self.human_status,
             "recommended_action": self.recommended_action,
+            "recommendation_reason": self.recommendation_reason,
         }
 
 

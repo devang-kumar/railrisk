@@ -32,6 +32,66 @@
     "delay_multiplier": 1.5,
     "max_score": 100
   },
+  "risk_reasoning_rules": [
+    {
+      "min_risk_score": 80,
+      "reasoning_template": "This shipment has a very high risk score due to {criticality_level} criticality and {delay_severity} delay severity.",
+      "human_status": "Awaiting Dispatcher Approval"
+    },
+    {
+      "min_risk_score": 50,
+      "reasoning_template": "Risk score is elevated due to {criticality_level} cargo and {delay_severity} delay severity.",
+      "human_status": "Recommended for Human Review"
+    },
+    {
+      "min_risk_score": 30,
+      "reasoning_template": "Moderate risk level due to {criticality_level} cargo and {delay_severity} delay.",
+      "human_status": "Pending"
+    },
+    {
+      "min_risk_score": 0,
+      "reasoning_template": "Low risk - {criticality_level} cargo and {delay_severity} delay severity.",
+      "human_status": "Pending"
+    }
+  ],
+  "cargo_specific_actions": {
+    "Liquid Oxygen": {
+      "80": "IMMEDIATE ESCALATION: Activate emergency road transport backup and alert hospital management immediately.",
+      "50": "ALERT: Coordinate with hospital backup oxygen reserves and prepare emergency backup transport.",
+      "30": "MONITOR: Update hospital oxygen levels and ETA.",
+      "0": "LOG: Monitor delivery on schedule."
+    },
+    "Vaccines and Medicine": {
+      "80": "IMMEDIATE ESCALATION: Reroute via refrigerated truck and monitor cold chain continuously.",
+      "50": "ALERT: Check cold chain integrity and expedite shipment.",
+      "30": "MONITOR: Track cold chain and update ETA.",
+      "0": "LOG: Monitor delivery."
+    },
+    "Jet Fuel": {
+      "80": "IMMEDIATE ESCALATION: Dispatch backup fuel tanker convoy immediately.",
+      "50": "ALERT: Notify airport fuel reserves and prepare backup supplies.",
+      "30": "MONITOR: Update ETA to airport.",
+      "0": "LOG: Monitor delivery."
+    },
+    "Coal": {
+      "80": "IMMEDIATE ESCALATION: Activate emergency coal supplies via alternative rail.",
+      "50": "ALERT: Notify power plant of delay and monitor coal reserves.",
+      "30": "MONITOR: Update ETA to power plant.",
+      "0": "LOG: Monitor delivery."
+    },
+    "Perishable Food (Produce)": {
+      "80": "IMMEDIATE ESCALATION: Reroute via refrigerated truck immediately.",
+      "50": "ALERT: Notify distribution center of potential spoilage.",
+      "30": "MONITOR: Update ETA and spoilage risk.",
+      "0": "LOG: Monitor delivery."
+    },
+    "Industrial Chemicals": {
+      "80": "IMMEDIATE ESCALATION: Notify water treatment facility and prepare backup chemicals.",
+      "50": "ALERT: Monitor shipment status with water treatment facility.",
+      "30": "MONITOR: Update ETA.",
+      "0": "LOG: Monitor delivery."
+    }
+  },
   "action_recommendations": [
     {
       "min_risk_score": 80,

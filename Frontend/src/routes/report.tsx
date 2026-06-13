@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Download, FileText, Printer, ShieldAlert } from "lucide-react";
 import { AppShell, RiskBadge } from "@/components/AppShell";
-import { wagons } from "@/lib/railrisk-data";
+import { wagons as staticWagons, fetchWagons, type Wagon } from "@/lib/railrisk-data";
 import { ActionModal, RerouteMap } from "@/components/AgenticAction";
 
 export const Route = createFileRoute("/report")({
@@ -20,6 +20,12 @@ export const Route = createFileRoute("/report")({
 });
 
 function ReportPage() {
+  const [wagons, setWagons] = useState<Wagon[]>(staticWagons);
+
+  useEffect(() => {
+    fetchWagons().then(setWagons).catch(() => {});
+  }, []);
+
   const critical = wagons.filter((w) => w.risk === "Critical" || w.risk === "High");
 
   return (
@@ -44,18 +50,16 @@ function ReportPage() {
         </div>
       </div>
 
-      {/* Cover summary */}
       <div className="glass-ember rounded-3xl p-8 mb-6 relative overflow-hidden animate-fade-up">
         <div className="absolute -top-32 -left-32 size-96 rounded-full bg-[#ff1e1e]/25 blur-3xl pointer-events-none" />
         <div className="relative grid grid-cols-2 md:grid-cols-4 gap-6">
-          <Cover label="Report ID" value="RR-2026-06-10-A" />
-          <Cover label="Generated" value="10 Jun 2026 · 14:32 IST" />
+          <Cover label="Report ID" value="RR-LIVE" />
+          <Cover label="Generated" value={`${new Date().toLocaleDateString()} · Live`} />
           <Cover label="Elevated Wagons" value={`${critical.length}`} />
-          <Cover label="Overall posture" value="Critical" tone="critical" />
+          <Cover label="Overall posture" value={critical.length > 0 ? "Critical" : "Normal"} tone="critical" />
         </div>
       </div>
 
-      {/* Per-wagon report cards */}
       <div className="flex flex-col gap-5">
         {critical
           .sort((a, b) => b.criticalityScore - a.criticalityScore)
@@ -67,7 +71,7 @@ function ReportPage() {
   );
 }
 
-function ReportCard({ w }: { w: typeof wagons[0] }) {
+function ReportCard({ w }: { w: Wagon }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
@@ -83,7 +87,7 @@ function ReportCard({ w }: { w: typeof wagons[0] }) {
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="font-bold text-lg">{w.cargo}</h2>
-              <RiskBadge level={w.risk as "Critical" | "High" | "Elevated"} />
+              <RiskBadge level={w.risk as "Critical" | "High"} />
             </div>
             <div className="text-xs text-white/55 mt-0.5">
               Train {w.trainId} · {w.route} · → {w.receiver}
@@ -97,6 +101,9 @@ function ReportCard({ w }: { w: typeof wagons[0] }) {
           <div className="text-3xl font-bold text-ember tabular-nums">
             {w.criticalityScore}
           </div>
+          <div className="text-xs text-white/40 mt-1">
+            Status: <span className="text-white">{w.humanStatus}</span>
+          </div>
         </div>
       </header>
 
@@ -106,16 +113,23 @@ function ReportCard({ w }: { w: typeof wagons[0] }) {
         <ReportField label="Cargo category" value={w.cargoCategory} />
       </div>
 
+      <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Block icon={<FileText className="size-3.5" />} label="Risk Reasoning">
+          {w.riskReasoning}
+        </Block>
+        <Block icon={<FileText className="size-3.5" />} label="Recommendation Reason">
+          {w.recommendationReason}
+        </Block>
+      </div>
+
       <div className="mt-5">
         <Block icon={<FileText className="size-3.5" />} label="Explainable Recommendation">
           This shipment is <strong className={w.risk === "Critical" ? "text-[#ff1e1e]" : "text-white"}>{w.risk}</strong> because {w.reason} The downstream impact is {w.impact}
         </Block>
       </div>
 
-      {/* AI Action Block with Map */}
       <div className="mt-5 grid grid-cols-1 lg:grid-cols-2 gap-4">
         <RerouteMap destination={w.receiver} />
-        
         <div className="glass-ember rounded-2xl p-5 flex flex-col justify-between">
           <div>
             <div className="text-[10px] uppercase tracking-[0.2em] text-[#ff6b00] font-semibold mb-2">
@@ -123,7 +137,7 @@ function ReportCard({ w }: { w: typeof wagons[0] }) {
             </div>
             <p className="font-semibold text-lg">{w.recommendedAction}</p>
           </div>
-          <button 
+          <button
             onClick={() => setIsModalOpen(true)}
             className="mt-4 btn-ember hover:btn-ember-hover active:btn-ember-active self-start text-sm py-2 px-5"
           >
@@ -136,8 +150,6 @@ function ReportCard({ w }: { w: typeof wagons[0] }) {
     </article>
   );
 }
-
-
 
 function Cover({ label, value, tone }: { label: string; value: string; tone?: "critical" }) {
   return (

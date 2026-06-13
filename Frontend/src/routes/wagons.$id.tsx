@@ -19,11 +19,13 @@ import {
   X,
 } from "lucide-react";
 import { AppShell, RiskBadge } from "@/components/AppShell";
-import { getWagon, type Wagon } from "@/lib/railrisk-data";
+import { getWagon, type Wagon, fetchWagons } from "@/lib/railrisk-data";
 import { ActionModal, RerouteMap } from "@/components/AgenticAction";
+import { updateActionStatus, getActionStatus } from "@/lib/api-client";
 
 export const Route = createFileRoute("/wagons/$id")({
-  loader: ({ params }) => {
+  loader: async ({ params }) => {
+    await fetchWagons();
     const w = getWagon(params.id);
     if (!w) throw notFound();
     return { wagon: w };
@@ -60,22 +62,33 @@ function WagonDetail() {
   const [actionStatus, setActionStatus] = useState<"approved" | "denied" | null>(null);
 
   useEffect(() => {
-    const updateStatus = () => {
-      setActionStatus(sessionStorage.getItem(`action_${wagon.id}`) as any);
+    const updateStatus = async () => {
+      const stored = sessionStorage.getItem(`action_${wagon.id}`);
+      if (stored) {
+        setActionStatus(stored as any);
+      } else {
+        const remoteStatus = await getActionStatus(wagon.id);
+        if (remoteStatus !== "Pending") {
+          sessionStorage.setItem(`action_${wagon.id}`, remoteStatus);
+          setActionStatus(remoteStatus as any);
+        }
+      }
     };
     updateStatus();
     window.addEventListener("storage", updateStatus);
     return () => window.removeEventListener("storage", updateStatus);
   }, [wagon.id]);
 
-  const handleApprove = () => {
+  const handleApprove = async () => {
     sessionStorage.setItem(`action_${wagon.id}`, "approved");
     setActionStatus("approved");
+    await updateActionStatus(wagon.id, "approved");
   };
 
-  const handleDeny = () => {
+  const handleDeny = async () => {
     sessionStorage.setItem(`action_${wagon.id}`, "denied");
     setActionStatus("denied");
+    await updateActionStatus(wagon.id, "denied");
   };
 
   const generateSummary = async () => {
@@ -83,7 +96,6 @@ function WagonDetail() {
     try {
       const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
       if (!apiKey) {
-        // Mock fallback if no API key
         await new Promise(r => setTimeout(r, 1500));
         setAiSummary(`[MOCK AI] Wagon ${wagon.id} is carrying ${wagon.cargoCategory} cargo. Due to a ${wagon.delayHours}h delay, it is at a ${wagon.risk} risk level. The downstream impact is ${wagon.impact}. It is highly recommended to ${wagon.recommendedAction.toLowerCase()}.`);
         setIsGenerating(false);
@@ -120,7 +132,6 @@ function WagonDetail() {
         <ArrowLeft className="size-4 transition-transform duration-300 group-hover:-translate-x-1" /> Back to wagons
       </Link>
 
-      {/* Header card */}
       <div className="glass-ember rounded-3xl p-8 mb-6 relative overflow-hidden animate-fade-up">
         <div className="absolute -top-24 -right-24 size-80 rounded-full bg-[#ff1e1e]/25 blur-3xl pointer-events-none" />
         <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
@@ -156,9 +167,6 @@ function WagonDetail() {
         </div>
       </div>
 
-      {/* Removed escalation timeline from here, moved down */}
-
-      {/* Grid: facts + recommendation */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div className="lg:col-span-2 space-y-6">
           <div className="glass rounded-3xl p-6">
@@ -167,17 +175,12 @@ function WagonDetail() {
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Fact icon={<Timer className="size-3.5" />} label="Delay" value={`${wagon.delayHours} hours`} />
-              <Fact
-                icon={<Clock className="size-3.5" />}
-                label="Backup window"
-                value={`${wagon.backupHours} hours`}
-              />
+              <Fact icon={<Clock className="size-3.5" />} label="Backup window" value={`${wagon.backupHours} hours`} />
               <Fact icon={<Boxes className="size-3.5" />} label="Cargo type" value={wagon.cargoCategory} />
               <Fact icon={<Hospital className="size-3.5" />} label="Receiver" value={wagon.receiver} />
             </div>
           </div>
 
-          {/* Explainable Recommendation - High Visibility */}
           <div className="glass rounded-3xl p-6 border-l-[4px] border-[#ff6b00] shadow-[0_0_20px_rgba(255,107,0,0.1)] relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-[#ff6b00]/10 to-transparent pointer-events-none" />
             <div className="relative">
@@ -193,7 +196,6 @@ function WagonDetail() {
             </div>
           </div>
 
-          {/* GenAI Summary - High Visibility */}
           <div className="glass rounded-3xl p-6 border border-indigo-500/30 relative overflow-hidden shadow-[0_0_20px_rgba(99,102,241,0.05)]">
             <div className="absolute -top-10 -right-10 size-40 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none" />
             <div className="relative">
@@ -231,12 +233,9 @@ function WagonDetail() {
           </div>
         </div>
 
-        {/* Recommendation panel */}
         <div className="glass-ember rounded-3xl p-6 relative overflow-hidden h-fit flex flex-col gap-5">
           <div className="absolute -bottom-20 -right-20 size-60 rounded-full bg-[#ff1e1e]/30 blur-3xl pointer-events-none" />
-          
           <RerouteMap destination={wagon.receiver} />
-
           <div className="relative">
             <div className="flex items-center gap-2 text-[#ff6b00] mb-2">
               <Zap className="size-4" />
@@ -285,7 +284,6 @@ function WagonDetail() {
       
       <ActionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} w={wagon} onApprove={handleApprove} onDeny={handleDeny} />
 
-      {/* Living system: escalation timeline */}
       <div className="glass rounded-3xl p-6 mb-6 animate-fade-up">
         <div className="flex items-center justify-between mb-5">
           <div>
@@ -319,7 +317,6 @@ function WagonDetail() {
         </div>
       </div>
 
-      {/* Agent reasoning chain */}
       <div className="glass rounded-3xl p-6">
         <div className="flex items-center gap-2 mb-5">
           <Brain className="size-4 text-[#ff6b00]" />
@@ -377,12 +374,12 @@ function ReasoningChain({ wagon }: { wagon: Wagon }) {
     {
       icon: <TrendingUp className="size-4" />,
       agent: "Impact Prediction",
-      out: wagon.impact,
+      out: wagon.riskReasoning,
     },
     {
       icon: <Zap className="size-4" />,
       agent: "Action Recommendation",
-      out: wagon.recommendedAction,
+      out: `${wagon.recommendedAction} (Reason: ${wagon.recommendationReason})`,
     },
   ];
   return (
