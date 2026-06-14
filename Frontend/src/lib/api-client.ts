@@ -7,6 +7,10 @@ export interface Shipment {
   delay_time_hours: number;
   urgency_level: string;
   dependency_type: string;
+  wagon_age_years?: number;
+  load_weight_tons?: number;
+  days_since_service?: number;
+  route_weather?: string;
   downstream_impact?: string;
 }
 
@@ -14,10 +18,14 @@ export interface RiskReport {
   shipment_id: string;
   cargo_type: string;
   destination: string;
+  weather: string;
+  ml_breakdown_prob: number;
   delay_hours: number;
   delay_severity: string;
   criticality_level: string;
   criticality_score: number;
+  env_multiplier: number;
+  env_reasoning: string;
   risk_score: number;
   predicted_impact: string;
   risk_reasoning: string;

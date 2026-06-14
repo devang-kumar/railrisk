@@ -14,8 +14,8 @@ def main():
     dataset = load_dataset()
     pipeline = RailRiskPipeline()
 
-    # Pick 4 diverse cases: oxygen, coal, electronics, industrial chemicals
-    test_ids = {"FRT-1001", "FRT-1005", "FRT-1007", "FRT-1008"}
+    # Pick diverse cases including the new dynamic out-of-distribution ones
+    test_ids = {"FRT-1001", "FRT-1007", "FRT-2001", "FRT-2004"}
     test_cases = [s for s in dataset if s["id"] in test_ids]
 
     print("====================================================")

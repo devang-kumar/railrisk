@@ -6,7 +6,11 @@
     "delay_time_hours": 4.5,
     "urgency_level": "Critical",
     "dependency_type": "Healthcare",
-    "downstream_impact": "Potential shortage in ICU life-support systems."
+    "downstream_impact": "Potential shortage in ICU life-support systems.",
+    "wagon_age_years": 12,
+    "load_weight_tons": 50,
+    "days_since_service": 180,
+    "route_weather": "Extreme Heat Wave"
   },
   {
     "id": "FRT-1002",
@@ -15,7 +19,11 @@
     "delay_time_hours": 12.0,
     "urgency_level": "Critical",
     "dependency_type": "Healthcare",
-    "downstream_impact": "Spoilage risk if temperature control fails; delays in regional clinic supplies."
+    "downstream_impact": "Spoilage risk if temperature control fails.",
+    "wagon_age_years": 5,
+    "load_weight_tons": 20,
+    "days_since_service": 30,
+    "route_weather": "Heavy Rain"
   },
   {
     "id": "FRT-1003",
@@ -24,7 +32,11 @@
     "delay_time_hours": 6.0,
     "urgency_level": "High",
     "dependency_type": "Transportation",
-    "downstream_impact": "Flight delays and cancellations if reserve fuel levels drop."
+    "downstream_impact": "Flight delays and cancellations if reserve fuel levels drop.",
+    "wagon_age_years": 8,
+    "load_weight_tons": 70,
+    "days_since_service": 90,
+    "route_weather": "Clear"
   },
   {
     "id": "FRT-1004",
@@ -33,7 +45,11 @@
     "delay_time_hours": 18.0,
     "urgency_level": "Medium",
     "dependency_type": "Retail/Food Supply",
-    "downstream_impact": "Spoilage of fresh produce and retail stockouts."
+    "downstream_impact": "Spoilage of fresh produce.",
+    "wagon_age_years": 20,
+    "load_weight_tons": 40,
+    "days_since_service": 300,
+    "route_weather": "Humid / Hot"
   },
   {
     "id": "FRT-1005",
@@ -42,16 +58,11 @@
     "delay_time_hours": 24.0,
     "urgency_level": "High",
     "dependency_type": "Power Grid",
-    "downstream_impact": "Risk of power grid instability if plant coal reserves fall below 48 hours."
-  },
-  {
-    "id": "FRT-1006",
-    "cargo_type": "Raw Steel",
-    "destination": "Automotive Manufacturing Plant",
-    "delay_time_hours": 36.0,
-    "urgency_level": "Medium",
-    "dependency_type": "Manufacturing",
-    "downstream_impact": "Assembly line halt leading to $2M/day loss."
+    "downstream_impact": "Risk of power grid instability.",
+    "wagon_age_years": 25,
+    "load_weight_tons": 100,
+    "days_since_service": 400,
+    "route_weather": "Monsoon Flooding"
   },
   {
     "id": "FRT-1007",
@@ -60,33 +71,36 @@
     "delay_time_hours": 48.0,
     "urgency_level": "Low",
     "dependency_type": "Retail",
-    "downstream_impact": "Delayed customer deliveries; no critical infrastructure impact."
+    "downstream_impact": "Delayed customer deliveries.",
+    "wagon_age_years": 2,
+    "load_weight_tons": 15,
+    "days_since_service": 60,
+    "route_weather": "Snowstorm"
   },
   {
-    "id": "FRT-1008",
-    "cargo_type": "Industrial Chemicals",
-    "destination": "Water Treatment Facility",
-    "delay_time_hours": 8.0,
+    "id": "FRT-2001",
+    "cargo_type": "Live Organs for Transplant",
+    "destination": "National Transplant Center",
+    "delay_time_hours": 2.0,
+    "urgency_level": "Extreme",
+    "dependency_type": "Healthcare",
+    "downstream_impact": "Loss of organ viability.",
+    "wagon_age_years": 1,
+    "load_weight_tons": 2,
+    "days_since_service": 10,
+    "route_weather": "Clear"
+  },
+  {
+    "id": "FRT-2004",
+    "cargo_type": "Live Cattle (Livestock)",
+    "destination": "Agricultural Hub",
+    "delay_time_hours": 24.0,
     "urgency_level": "High",
-    "dependency_type": "Public Utilities",
-    "downstream_impact": "Risk to municipal water purification process."
-  },
-  {
-    "id": "FRT-1009",
-    "cargo_type": "Grain and Wheat",
-    "destination": "Food Processing Plant",
-    "delay_time_hours": 14.0,
-    "urgency_level": "Medium",
-    "dependency_type": "Food Supply",
-    "downstream_impact": "Production schedule adjustments required."
-  },
-  {
-    "id": "FRT-1010",
-    "cargo_type": "Apparel and Clothing",
-    "destination": "Downtown Retail Stores",
-    "delay_time_hours": 72.0,
-    "urgency_level": "Low",
-    "dependency_type": "Retail",
-    "downstream_impact": "Minimal impact; seasonal stock arrival delayed."
+    "dependency_type": "Agriculture",
+    "downstream_impact": "Animal welfare concerns.",
+    "wagon_age_years": 15,
+    "load_weight_tons": 45,
+    "days_since_service": 200,
+    "route_weather": "Extreme Heat Wave"
   }
 ]

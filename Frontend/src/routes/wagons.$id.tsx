@@ -17,6 +17,8 @@ import {
   Sparkles,
   CheckCircle2,
   X,
+  CloudRain,
+  Activity,
 } from "lucide-react";
 import { AppShell, RiskBadge } from "@/components/AppShell";
 import { getWagon, type Wagon, fetchWagons } from "@/lib/railrisk-data";
@@ -178,6 +180,8 @@ function WagonDetail() {
               <Fact icon={<Clock className="size-3.5" />} label="Backup window" value={`${wagon.backupHours} hours`} />
               <Fact icon={<Boxes className="size-3.5" />} label="Cargo type" value={wagon.cargoCategory} />
               <Fact icon={<Hospital className="size-3.5" />} label="Receiver" value={wagon.receiver} />
+              <Fact icon={<CloudRain className="size-3.5" />} label="Route Weather" value={wagon.weather} />
+              <Fact icon={<Activity className="size-3.5" />} label="Wagon ML Risk" value={`${wagon.mlBreakdownProb.toFixed(1)}% Failure Prob.`} />
             </div>
           </div>
 
@@ -367,9 +371,19 @@ function ReasoningChain({ wagon }: { wagon: Wagon }) {
       out: `Detected ${wagon.delayHours}h delay on ${wagon.trainId} (${wagon.route}).`,
     },
     {
+      icon: <Activity className="size-4" />,
+      agent: "Predictive Maintenance (ML)",
+      out: `Random Forest predicts a ${wagon.mlBreakdownProb.toFixed(1)}% probability of wagon failure.`,
+    },
+    {
       icon: <Layers className="size-4" />,
       agent: "Cargo Criticality",
       out: `Cargo "${wagon.cargo}" classified ${wagon.cargoCategory}. Sensitivity weight applied.`,
+    },
+    {
+      icon: <CloudRain className="size-4" />,
+      agent: "Environmental Context",
+      out: `Weather: ${wagon.weather}. Risk Multiplier: ${wagon.envMultiplier}x. ${wagon.envReasoning}`,
     },
     {
       icon: <TrendingUp className="size-4" />,

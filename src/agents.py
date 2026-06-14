@@ -1,120 +1,97 @@
 import json
 import os
+from groq import Groq
+from dotenv import load_dotenv
+
+from prompts import (
+    DELAY_AGENT_PROMPT,
+    CRITICALITY_AGENT_PROMPT,
+    ENVIRONMENTAL_AGENT_PROMPT,
+    IMPACT_AGENT_PROMPT,
+    ACTION_AGENT_PROMPT
+)
+
+load_dotenv()
 
 class BaseAgent:
     def __init__(self):
-        config_path = os.path.join(os.path.dirname(__file__), '..', 'config', 'rules.json')
-        with open(config_path, 'r') as f:
-            self.rules = json.load(f)
+        self.client = Groq() # Requires GROQ_API_KEY in environment
+        self.model = "llama-3.1-8b-instant"
+
+    def _call_llm(self, system_prompt: str) -> dict:
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": system_prompt}
+                ],
+                response_format={"type": "json_object"},
+                temperature=0.1
+            )
+            return json.loads(response.choices[0].message.content)
+        except Exception as e:
+            print(f"Error calling Groq API: {e}")
+            return {}
 
 class DelayDetectionAgent(BaseAgent):
-    """Detects delays and calculates delay severity dynamically."""
+    """Detects delays and calculates delay severity dynamically using Groq LLM."""
     def process(self, shipment: dict) -> dict:
-        delay = shipment.get("delay_time_hours", 0)
-        is_delayed = delay > 0
-        severity = "None"
-        
-        # Sort thresholds descending
-        thresholds = sorted(self.rules["delay_thresholds"].items(), key=lambda x: x[1], reverse=True)
-        for level, thresh in thresholds:
-            if delay >= thresh and delay > 0:
-                severity = level
-                break
-                
+        prompt = DELAY_AGENT_PROMPT.format(shipment_details=json.dumps(shipment))
+        result = self._call_llm(prompt)
         return {
-            "is_delayed": is_delayed,
-            "delay_severity": severity,
-            "delay_time_hours": delay
+            "is_delayed": result.get("is_delayed", shipment.get("delay_time_hours", 0) > 0),
+            "delay_severity": result.get("delay_severity", "Unknown"),
+            "delay_time_hours": result.get("delay_time_hours", shipment.get("delay_time_hours", 0))
         }
 
 class CargoCriticalityAgent(BaseAgent):
-    """Evaluates the criticality of the cargo based on dynamic urgency and dependency weights."""
+    """Evaluates the criticality of the cargo using Groq LLM."""
     def process(self, shipment: dict) -> dict:
-        urgency = shipment.get("urgency_level", "Low")
-        dependency = shipment.get("dependency_type", "Unknown")
-        
-        score = 0
-        
-        # Urgency scoring
-        score += self.rules["criticality_weights"]["urgency"].get(urgency, 5)
-            
-        # Dependency scoring
-        score += self.rules["criticality_weights"]["dependency"].get(dependency, self.rules["criticality_weights"]["default_dependency"])
-            
-        criticality = "Low"
-        thresholds = sorted(self.rules["criticality_thresholds"].items(), key=lambda x: x[1], reverse=True)
-        for level, thresh in thresholds:
-            if score >= thresh:
-                criticality = level
-                break
-                
+        prompt = CRITICALITY_AGENT_PROMPT.format(shipment_details=json.dumps(shipment))
+        result = self._call_llm(prompt)
         return {
-            "criticality_score": score,
-            "criticality_level": criticality
+            "criticality_score": result.get("criticality_score", 0),
+            "criticality_level": result.get("criticality_level", "Unknown")
+        }
+
+class EnvironmentalContextAgent(BaseAgent):
+    """Evaluates the weather impact on the specific cargo using Groq LLM."""
+    def process(self, shipment: dict) -> dict:
+        prompt = ENVIRONMENTAL_AGENT_PROMPT.format(shipment_details=json.dumps(shipment))
+        result = self._call_llm(prompt)
+        return {
+            "environmental_risk_multiplier": result.get("environmental_risk_multiplier", 1.0),
+            "weather_impact_reasoning": result.get("weather_impact_reasoning", "No weather impact.")
         }
 
 class ImpactPredictionAgent(BaseAgent):
-    """Predicts downstream impact and generates an overall risk score dynamically with reasoning."""
-    def process(self, shipment: dict, delay_info: dict, criticality_info: dict) -> dict:
-        delay_hrs = delay_info.get("delay_time_hours", 0)
-        crit_score = criticality_info.get("criticality_score", 0)
-        crit_level = criticality_info.get("criticality_level", "Low")
-        delay_severity = delay_info.get("delay_severity", "None")
-        
-        delay_multiplier = self.rules["risk_calculation"]["delay_multiplier"]
-        max_score = self.rules["risk_calculation"]["max_score"]
-        
-        risk_score = min(max_score, crit_score + (delay_hrs * delay_multiplier))
-        
-        # Get reasoning and human-in-the-loop status
-        reasoning = ""
-        human_status = "Pending"
-        reasoning_rules = sorted(self.rules["risk_reasoning_rules"], key=lambda x: x["min_risk_score"], reverse=True)
-        for rule in reasoning_rules:
-            if risk_score >= rule["min_risk_score"]:
-                reasoning = rule["reasoning_template"].format(
-                    criticality_level=crit_level,
-                    delay_severity=delay_severity
-                )
-                human_status = rule["human_status"]
-                break
-                
+    """Predicts downstream impact and risk score using Groq LLM."""
+    def process(self, shipment: dict, delay_info: dict, criticality_info: dict, env_info: dict, ml_prob: float) -> dict:
+        prompt = IMPACT_AGENT_PROMPT.format(
+            shipment_details=json.dumps(shipment),
+            delay_info=json.dumps(delay_info),
+            criticality_info=json.dumps(criticality_info),
+            environmental_info=json.dumps(env_info),
+            ml_breakdown_prob=ml_prob
+        )
+        result = self._call_llm(prompt)
         return {
-            "risk_score": round(risk_score, 1),
-            "predicted_impact": shipment.get("downstream_impact", "Unknown impact"),
-            "risk_reasoning": reasoning,
-            "human_status": human_status
+            "risk_score": result.get("risk_score", 0),
+            "predicted_impact": result.get("predicted_impact", "Unknown impact"),
+            "risk_reasoning": result.get("risk_reasoning", ""),
+            "human_status": result.get("human_status", "Pending")
         }
 
 class ActionRecommendationAgent(BaseAgent):
-    """Recommends action based on dynamic risk thresholds and cargo type."""
-    def process(self, shipment: dict, risk_info: dict) -> dict:
-        risk_score = risk_info.get("risk_score", 0)
-        cargo_type = shipment.get("cargo_type", "")
-        
-        action = "LOG: Standard delay logging. No immediate action required."
-        recommendation_reason = ""
-        
-        # First check cargo-specific actions
-        if cargo_type in self.rules.get("cargo_specific_actions", {}):
-            cargo_actions = self.rules["cargo_specific_actions"][cargo_type]
-            # Sort by score descending
-            sorted_scores = sorted([int(k) for k in cargo_actions.keys()], reverse=True)
-            for score in sorted_scores:
-                if risk_score >= score:
-                    action = cargo_actions[str(score)]
-                    recommendation_reason = f"Cargo-specific action recommended for {cargo_type} (risk score: {risk_score})."
-                    break
-        # Fallback to generic actions
-        if recommendation_reason == "":
-            recommendations = sorted(self.rules["action_recommendations"], key=lambda x: x["min_risk_score"], reverse=True)
-            for rec in recommendations:
-                if risk_score >= rec["min_risk_score"]:
-                    action = rec["action"]
-                    recommendation_reason = f"Generic action recommended (risk score: {risk_score})."
-                    break
-            
+    """Recommends action using Groq LLM."""
+    def process(self, shipment: dict, risk_info: dict, ml_prob: float) -> dict:
+        prompt = ACTION_AGENT_PROMPT.format(
+            shipment_details=json.dumps(shipment),
+            risk_info=json.dumps(risk_info),
+            ml_breakdown_prob=ml_prob
+        )
+        result = self._call_llm(prompt)
         return {
-            "recommended_action": action,
-            "recommendation_reason": recommendation_reason
+            "recommended_action": result.get("recommended_action", "LOG: No action recommended."),
+            "recommendation_reason": result.get("recommendation_reason", "")
         }

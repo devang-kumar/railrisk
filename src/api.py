@@ -26,6 +26,10 @@ class Shipment(BaseModel):
     delay_time_hours: float
     urgency_level: str
     dependency_type: str
+    wagon_age_years: Optional[float] = 10.0
+    load_weight_tons: Optional[float] = 50.0
+    days_since_service: Optional[float] = 100.0
+    route_weather: Optional[str] = "Clear"
     downstream_impact: Optional[str] = None
 
 @app.get("/")

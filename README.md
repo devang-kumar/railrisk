@@ -1,14 +1,10 @@
-# RailRisk AI
+# RailRisk AI: Full-Stack Hybrid AI & ML Disruption Intelligence
 
-Indian Railways moves thousands of trains and massive freight volumes every day.
-
-It knows where every wagon is.
-
-But delay dashboards do not always translate cargo details into risk priority.
+Indian Railways moves thousands of trains and massive freight volumes every day. It knows where every wagon is. But delay dashboards do not always translate cargo details and environmental factors into risk priority.
 
 The gap is not in tracking. The gap is in understanding.
 
-**RailRisk AI makes that connection.**
+**RailRisk AI makes that connection using state-of-the-art Machine Learning and LLM Agents.**
 
 ---
 
@@ -17,16 +13,11 @@ The gap is not in tracking. The gap is in understanding.
 A delayed train shows up in the system as one word — **"delayed."**
 
 No one asks what was inside.
+No one asks what the weather is like on the route.
+No one asks if the wagon is 15 years old and likely to break down.
 No one asks who was waiting.
-No one asks what happens next.
 
-And that silence has consequences.
-
-During emergency situations like COVID oxygen movement, flood relief, and industrial freight disruptions, even a few hours of delay can create serious downstream risk. Existing systems may track delay, but they do not always translate that delay into cargo criticality and response priority.
-
-The system records: *"freight delayed."*
-
-Every time. For every cargo. Regardless of what is inside.
+During emergency situations like COVID oxygen movement, flood relief, and industrial freight disruptions, even a few hours of delay can create serious downstream risk.
 
 The problem was never just the delay.
 **The problem was that no system knew what the delay actually meant.**
@@ -35,84 +26,44 @@ The problem was never just the delay.
 
 ## What RailRisk AI Does
 
-RailRisk AI is a disruption risk intelligence system for rail freight.
-
-It does not replace existing railway systems.
-It adds one layer that is currently missing —
-
-**cargo awareness.**
+RailRisk AI is a disruption risk intelligence system for rail freight. It does not replace existing railway systems. It adds a powerful **6-layer intelligence pipeline** that is currently missing.
 
 ```
-Delay detected
+[Layer 1] Machine Learning Predictive Maintenance (Random Forest)
       ↓
-Cargo identified
-medicine / oxygen / food / fuel / raw material
+[Layer 2] LLM Agent: Delay Severity Detection
       ↓
-Criticality scored
-how urgent is this cargo, for whom, and how much time is left
+[Layer 3] LLM Agent: Cargo Criticality Analysis
       ↓
-Downstream impact estimated
-which hospital, factory, market, or supply chain is at risk
+[Layer 4] LLM Agent: Environmental & Weather Context
       ↓
-Action recommended
-reroute / road transfer / priority alert / notify authority
+[Layer 5] LLM Agent: Downstream Impact Prediction
       ↓
-RailRisk Report generated
+[Layer 6] LLM Agent: Action Recommendation
+      ↓
+Beautiful React Frontend Report generated
 ```
 
-A delayed wagon carrying steel — low priority. Monitor.
+A delayed wagon carrying steel on a clear day — low priority. Monitor.
 
-A delayed wagon carrying oxygen cylinders for a hospital with 4 hours of backup — **Critical. Act now.**
+A delayed wagon carrying **Live Cattle** in an **Extreme Heat Wave** in a 15-year old wagon with a 6% breakdown probability — **Critical. Act now.**
 
 RailRisk AI knows the difference.
 
 ---
 
-## Demo Case
+## How It Works — The 6-Layer Architecture
 
-```
-Train ID      :  12345
-Wagon ID      :  W-08
-Route         :  Kanpur → Lucknow
-Cargo         :  Oxygen Cylinders
-Destination   :  City Hospital
-Delay         :  6 hours
-Backup Time   :  4 hours
-─────────────────────────────────
-Criticality   :  Critical
-Risk Score    :  94 / 100
-Impact        :  Hospital oxygen supply at risk
-Action        :  Priority alert + road transfer
-Reason        :  Delay exceeds available backup time
-```
+RailRisk AI abandons traditional `if-else` rules. It runs entirely on a dynamic, hybrid AI/ML pipeline.
 
----
+1. **Predictive Maintenance (Scikit-Learn ML)**: A highly-tuned Random Forest algorithm (optimized for high recall and precision) evaluates telematics data (`wagon_age`, `load_weight`, `days_since_service`) to predict the statistical probability of a mechanical failure.
+2. **Delay Detection (Groq LLM)**: Analyzes if the wagon is delayed and the severity of the delay.
+3. **Cargo Criticality (Groq LLM)**: Understands the semantic importance of the cargo. (e.g., Live Organs > Steel Coils).
+4. **Environmental Context (Groq LLM)**: Cross-references cargo vulnerabilities with live route weather (e.g., Extreme Heat damages perishables, Snowstorms delay electronics). It generates a dynamic risk multiplier.
+5. **Impact Prediction (Groq LLM)**: Predicts the holistic socio-economic damage (e.g., "Hospital will run out of ICU oxygen in 2 hours").
+6. **Action Recommendation (Groq LLM)**: Formulates an exact, human-readable directive (e.g., "IMMEDIATE ESCALATION: Reroute via cold chain road transport").
 
-## How It Works — 4 Agents
-
-RailRisk AI runs as a sequential 4-agent pipeline.
-Each agent takes the previous output and adds one layer of intelligence.
-
-**Agent 1 — Delay Detection**
-Is this wagon delayed? By how much? On which route?
-
-**Agent 2 — Cargo Criticality**
-What is inside? How critical is it?
-
-| Cargo | Criticality |
-|---|---|
-| Oxygen / Medicine / Fuel | Critical |
-| Food / Perishables | High |
-| Factory Raw Material | Medium-High |
-| Normal Goods | Low-Medium |
-
-**Agent 3 — Impact Prediction**
-Who is affected? How much time is left before damage begins?
-
-**Agent 4 — Action Recommendation**
-What should happen first — reroute, road transfer, priority alert, or authority notification?
-
-One input. Four layers. One clear report.
+One input. Six layers. One clear report.
 
 ---
 
@@ -120,12 +71,11 @@ One input. Four layers. One clear report.
 
 | Layer | Technology |
 |---|---|
-| Backend | Python + FastAPI |
-| Agent Logic | Rule-based Python modules |
-| Dataset | JSON — simulated freight data |
-| Frontend | React + Tailwind CSS |
-| API | FastAPI — single POST endpoint |
-| Storage | SQLite / PostgreSQL |
+| **Machine Learning** | Python, `scikit-learn`, `pandas`, `numpy` |
+| **LLM Inference** | `groq` SDK (`llama-3.1-8b-instant`), `pydantic` |
+| **Backend API** | Python + FastAPI + Uvicorn |
+| **Frontend UI** | React + Tailwind CSS + Vite |
+| **Data Engine** | JSON — simulated telemetry and weather data |
 
 ---
 
@@ -133,53 +83,83 @@ One input. Four layers. One clear report.
 
 ```text
 railrisk-ai/
-├── config/
-│   └── rules.json          # Dynamic rules configuration
+├── Frontend/                 # React UI Dashboard
+│   ├── src/components/       # UI Components
+│   └── src/routes/           # Dashboard and Wagon Detail pages
 ├── data/
-│   └── freight_dataset.json # Simulated datasets
+│   └── freight_dataset.json  # Multi-dimensional dataset
 ├── src/
-│   ├── agents.py           # 4-layer agent logic
-│   └── main.py             # CLI pipeline runner
+│   ├── api.py                # FastAPI Backend
+│   ├── ml_model.py           # Random Forest Predictive Maintenance
+│   ├── agents.py             # Groq LLM Agent definitions
+│   ├── pipeline.py           # 6-Layer Orchestrator
+│   └── prompts.py            # AI System Instructions
+├── .env                      # API Keys (GROQ_API_KEY, etc.)
 └── README.md
 ```
 
 ---
 
-## How to Run Locally (CLI Pipeline)
+## How to Run Locally
 
-```bash
-git clone https://github.com/devang-kumar/railrisk.git
-cd railrisk
-
-# Run the agentic pipeline over the mock dataset
-python src/main.py
+### 1. Prerequisites
+You will need a `.env` file in the root directory containing your API keys:
 ```
+GROQ_API_KEY=your_key_here
+```
+
+### 2. Start the FastAPI AI Backend
+```bash
+cd railrisk
+pip install -r requirements.txt
+uvicorn src.api:app --reload
+```
+The backend API will be available at `http://localhost:8000`.
+
+### 3. Start the React Frontend Dashboard
+In a new terminal:
+```bash
+cd railrisk/Frontend
+npm install
+npm run dev
+```
+The beautiful frontend will be available at `http://localhost:5173`.
 
 ---
 
-## API
+## API Documentation
 
-**POST** `/analyze`
+**POST** `/api/predict`
 
 ```json
 {
-  "train_id": "12345",
-  "wagon_id": "W-08",
-  "cargo_type": "oxygen_cylinders",
-  "delay_hours": 6,
-  "receiver_type": "hospital",
-  "backup_time": 4
+  "id": "W-08",
+  "cargo_type": "Liquid Oxygen",
+  "destination": "City Hospital",
+  "delay_time_hours": 4.5,
+  "urgency_level": "High",
+  "dependency_type": "Life Support",
+  "wagon_age_years": 12,
+  "load_weight_tons": 80,
+  "days_since_service": 250,
+  "route_weather": "Extreme Heat Wave"
 }
 ```
 
 **Response:**
 ```json
 {
-  "criticality": "Critical",
-  "risk_score": 94,
-  "impact": "Hospital oxygen supply at risk",
-  "recommended_action": "Priority alert + road transfer",
-  "reason": "Delay exceeds available backup time"
+  "shipment_id": "W-08",
+  "cargo_type": "Liquid Oxygen",
+  "weather": "Extreme Heat Wave",
+  "ml_breakdown_prob": 6.0,
+  "env_multiplier": 1.2,
+  "env_reasoning": "Heat can cause liquid oxygen to expand...",
+  "criticality_score": 95,
+  "risk_score": 87,
+  "human_status": "Recommended for Human Review",
+  "recommended_action": "IMMEDIATE ESCALATION: Activate Emergency Cold Chain",
+  "recommendation_reason": "..."
 }
 ```
 
@@ -187,11 +167,7 @@ python src/main.py
 
 ## What This System Does Not Claim
 
-RailRisk AI does not claim to predict outcomes with certainty.
-
-It is a **risk intelligence tool** — it estimates criticality, flags high-risk delays, and recommends priority actions for human review.
-
-Final decisions remain with the authority.
+RailRisk AI does not claim to predict outcomes with certainty. It is a **risk intelligence tool** — it estimates criticality, flags high-risk delays, and recommends priority actions for human review. Final decisions remain with the authority.
 
 ---
 
@@ -203,7 +179,7 @@ Final decisions remain with the authority.
 | Member | Role |
 |---|---|
 | Ekta | Strategy, research, problem framing, content, team alignment |
-| Devang | Backend, agents, risk logic, dataset, API, GitHub |
+| Devang | Backend, ML, LLM Agents, risk logic, dataset, API, GitHub |
 | Aryan | Frontend, UI/UX, PPT, demo visuals |
 | Piyush | Pitch, storytelling, judge Q&A, final presentation |
 | Mannu | Coordination, progress tracking, testing, submission |

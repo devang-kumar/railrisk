@@ -25,6 +25,10 @@ export interface Wagon {
   impact: string;
   backupHours: number;
   escalationStage: number;
+  weather: string;
+  mlBreakdownProb: number;
+  envMultiplier: number;
+  envReasoning: string;
 }
 
 const cargoCategoryMap: Record<string, CargoCategory> = {
@@ -73,6 +77,10 @@ function mapRiskReportToWagon(report: RiskReport, index: number): Wagon {
     impact: report.predicted_impact,
     backupHours: getBackupHours(report.cargo_type, report.delay_hours),
     escalationStage: getEscalationStage(report.risk_score),
+    weather: report.weather || "Unknown",
+    mlBreakdownProb: report.ml_breakdown_prob || 0,
+    envMultiplier: report.env_multiplier || 1.0,
+    envReasoning: report.env_reasoning || "",
   };
 }
 
@@ -138,7 +146,7 @@ function getFallbackWagons(): Wagon[] {
       riskReasoning: "This shipment has a very high risk score due to High criticality and Minor delay severity.",
       recommendationReason: "Cargo-specific action recommended for Medical Oxygen Cylinders (risk score: 94).",
       humanStatus: "Awaiting Dispatcher Approval", impact: "Emergency oxygen supply to 240-bed hospital may fail within 90 minutes.",
-      backupHours: 3, escalationStage: 4,
+      backupHours: 3, escalationStage: 4, weather: "Clear", mlBreakdownProb: 2.1, envMultiplier: 1.0, envReasoning: "No weather impact.",
     },
     {
       id: "W-12", trainId: "TR-1108", route: "Vadodara → Delhi", cargo: "Insulin & Vaccine Cold Chain",
@@ -148,7 +156,7 @@ function getFallbackWagons(): Wagon[] {
       riskReasoning: "Risk score is elevated due to High cargo and Minor delay severity.",
       recommendationReason: "Cargo-specific action recommended for Insulin & Vaccine Cold Chain (risk score: 81).",
       humanStatus: "Recommended for Human Review", impact: "Vaccine batch worth ₹1.2Cr at risk of spoilage.",
-      backupHours: 5, escalationStage: 3,
+      backupHours: 5, escalationStage: 3, weather: "Extreme Heat", mlBreakdownProb: 4.5, envMultiplier: 1.5, envReasoning: "Heat accelerates vaccine spoilage.",
     },
     {
       id: "W-03", trainId: "TR-9920", route: "Visakhapatnam → Hyderabad", cargo: "Diesel Fuel",
@@ -158,7 +166,7 @@ function getFallbackWagons(): Wagon[] {
       riskReasoning: "Risk score is elevated due to High cargo and Minor delay severity.",
       recommendationReason: "Cargo-specific action recommended for Diesel Fuel (risk score: 76).",
       humanStatus: "Recommended for Human Review", impact: "Possible 2-hour power disruption to industrial sector.",
-      backupHours: 8, escalationStage: 2,
+      backupHours: 8, escalationStage: 2, weather: "Clear", mlBreakdownProb: 1.2, envMultiplier: 1.0, envReasoning: "No weather impact.",
     },
     {
       id: "W-21", trainId: "TR-3045", route: "Ludhiana → Jaipur", cargo: "Perishable Produce",
@@ -168,7 +176,7 @@ function getFallbackWagons(): Wagon[] {
       riskReasoning: "Moderate risk level due to Medium cargo and Minor delay.",
       recommendationReason: "Cargo-specific action recommended for Perishable Produce (risk score: 52).",
       humanStatus: "Recommended for Human Review", impact: "Minor market disruption; alternative supply available.",
-      backupHours: 12, escalationStage: 2,
+      backupHours: 12, escalationStage: 2, weather: "Rain", mlBreakdownProb: 5.0, envMultiplier: 1.1, envReasoning: "Rain slightly impacts produce.",
     },
     {
       id: "W-17", trainId: "TR-7712", route: "Chennai → Bengaluru", cargo: "Steel Coils",
@@ -178,7 +186,7 @@ function getFallbackWagons(): Wagon[] {
       riskReasoning: "Low risk - Low cargo and None delay severity.",
       recommendationReason: "Generic action recommended (risk score: 24).",
       humanStatus: "Pending", impact: "No operational impact expected.",
-      backupHours: 36, escalationStage: 1,
+      backupHours: 36, escalationStage: 1, weather: "Clear", mlBreakdownProb: 0.5, envMultiplier: 1.0, envReasoning: "No weather impact.",
     },
     {
       id: "W-29", trainId: "TR-5563", route: "Kolkata → Patna", cargo: "Ventilator Components",
@@ -188,7 +196,7 @@ function getFallbackWagons(): Wagon[] {
       riskReasoning: "Risk score is elevated due to High cargo and Minor delay severity.",
       recommendationReason: "Cargo-specific action recommended for Ventilator Components (risk score: 78).",
       humanStatus: "Recommended for Human Review", impact: "ICU capacity expansion delayed for 60 patients.",
-      backupHours: 6, escalationStage: 3,
+      backupHours: 6, escalationStage: 3, weather: "Clear", mlBreakdownProb: 3.2, envMultiplier: 1.0, envReasoning: "No weather impact.",
     },
     {
       id: "W-34", trainId: "TR-4480", route: "Surat → Ahmedabad", cargo: "Textiles",
@@ -198,7 +206,7 @@ function getFallbackWagons(): Wagon[] {
       riskReasoning: "Low risk - Low cargo and None delay severity.",
       recommendationReason: "Generic action recommended (risk score: 12).",
       humanStatus: "Pending", impact: "None.",
-      backupHours: 48, escalationStage: 1,
+      backupHours: 48, escalationStage: 1, weather: "Clear", mlBreakdownProb: 0.1, envMultiplier: 1.0, envReasoning: "No weather impact.",
     },
   ];
 }
